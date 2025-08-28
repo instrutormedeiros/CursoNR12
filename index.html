@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso de NR-12 - Segurança no Trabalho em Máquinas e Equipamentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #F3F4F6;
+            scroll-behavior: smooth;
+        }
+        .sidebar {
+            position: sticky;
+            top: 0.5rem;
+            max-height: calc(100vh - 5rem);
+            overflow-y: auto;
+            background-color: #FFFFFF;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.2em;
+        }
+        #content-area {
+            transition: opacity 0.3s ease;
+        }
+        #content-area.fade {
+            opacity: 0;
+        }
+        .quiz-option {
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            background-color: #e5e7eb;
+            border: 1px solid #d1d5db;
+        }
+        .quiz-option:hover {
+            background-color: #d1d5db;
+        }
+        .quiz-option.selected {
+            background-color: #3b82f6 !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
+        }
+        .quiz-option.correct {
+            background-color: #22c55e !important;
+            color: #ffffff !important;
+            border-color: #16a34a !important;
+        }
+        .quiz-option.incorrect {
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+            border-color: #dc2626 !important;
+        }
+        .quiz-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .explanation {
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        .progress-container {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #fff;
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .progress-bar {
+            height: 1rem;
+            background: #f97316;
+            transition: width 0.3s ease;
+            border-radius: 0.25rem;
+        }
+        .action-button {
+            background-color: #F97316;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+        .action-button:hover {
+            background-color: #EA580C;
+        }
+        .action-button:disabled {
+            background: #d1d5db !important;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        #congratulations-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 28rem;
+            pointer-events: none;
+        }
+        #congratulations-message.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #certificate-form-container {
+            display: none;
+        }
+        #certificate-form-container.show {
+            display: block;
+        }
+        #content-area h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1E3A8A;
+            display: flex;
+            align-items: center;
+        }
+        #content-area h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1E40AF;
+        }
+        #content-area p {
+            margin-bottom: 1rem;
+            color: #4B5563;
+            line-height: 1.625;
+        }
+        #content-area ul {
+            list-style-type: disc;
+            margin-left: 1.25rem;
+            margin-bottom: 1rem;
+            color: #4B5563;
+        }
+        .social-link:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                max-height: none;
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            .flex-col.md\:flex-row {
+                flex-direction: column;
+            }
+            .social-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="progress-container">
+        <div class="container mx-auto px-6">
+            <p class="text-sm font-semibold mb-1">Progresso dos Módulos: <span id="progress-text">0%</span></p>
+            <div class="w-full bg-gray-200 rounded">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-4 shadow-md">
+        <div class="container mx-auto px-6">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold">Curso de NR-12: Segurança no Trabalho em Máquinas e Equipamentos</h1>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8 flex flex-col md:flex-row gap-6">
+        <aside class="md:w-1/3">
+            <div class="sidebar">
+                <h2 class="text-xl font-semibold mb-3 flex items-center text-gray-700">
+                    <i class="fas fa-book-open w-6 h-6 mr-2 text-orange-500"></i>
+                    Selecionar Módulo
+                </h2>
+                <select id="module-selector" class="w-full p-3 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-base">
+                    <option value="">Escolha um Módulo</option>
+                </select>
+            </div>
+        </aside>
+
+        <main class="md:w-2/3 bg-white p-6 rounded-lg shadow-md">
+            <div id="content-area"></div>
+        </main>
+    </div>
+
+    <div id="congratulations-message" class="hidden">
+        <h2 class="text-2xl font-bold text-orange-600 mb-4">Parabéns!</h2>
+        <p class="text-lg mb-4">Você concluiu o curso com sucesso e foi aprovado na prova final!</p>
+        <button id="close-congrats" class="action-button">Fechar</button>
+    </div>
+
+    <footer class="bg-blue-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <div id="certificate-form-container" class="max-w-md mx-auto mb-8 text-left bg-blue-800 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold mb-3 text-white">Solicite seu Certificado</h3>
+                <p class="text-sm mb-4 text-gray-300">Preencha os campos abaixo para receber seu certificado de conclusão:</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="full-name" class="block text-sm font-medium text-gray-200">Nome Completo</label>
+                        <input type="text" id="full-name" required class="w-full p-2 border border-blue-700 rounded bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400">
+                    </div>
+                    <div>
+                        <label for="cpf" class="block text-sm font-medium text-gray-200">CPF</label>
+                        <input type="text" id="cpf" required placeholder="123.456.789-00" class="w-full p-2 border border-blue-700 rounded bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-200">E-mail</label>
+                        <input type="email" id="email" required class="w-full p-2 border border-blue-700 rounded bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-gray-400">
+                    </div>
+                    <button id="submit-certificate" class="action-button w-full">Enviar Solicitação</button>
+                </div>
+            </div>
+
+            <p class="text-base mb-2">© 2019 Norma Regulamentadora 12. Todos os direitos reservados.</p>
+            <div class="text-sm mb-4 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                <span>Uniformizando profissionais desde 2019</span>
+                <a href="https://instrutormedeiros.github.io/fardamento-acampamento/" target="_blank" class="font-semibold hover:underline flex items-center">
+                    <i class="fas fa-shirt mr-2"></i>MEDEIROS ARTIGOS MILITARES
+                </a>
+            </div>
+            
+            <div class="flex justify-center gap-4 md:gap-6 social-links">
+                <a href="https://www.instagram.com/coordenadormedeiros" class="flex items-center text-gray-300 hover:text-orange-400 social-link transition-colors" target="_blank">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.332.014 7.052.072 2.95.227.228 2.996.073 7.052.014 8.332 0 8.741 0 12c0 3.259.014 3.668.072 4.948.225 4.053 2.992 6.771 7.048 6.927 1.28.058 1.689.072 4.948.072s3.668-.014 4.948-.072c4.054-.156 6.772-2.874 6.927-6.93.058-1.28.072-1.689.072-4.948s-.014-3.668-.072-4.948c -.156-4.054-2.874-6.772-6.93-6.927C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg>
+                    @coordenadormedeiros
+                </a>
+                <a href="https://www.linkedin.com/in/chefemedeiros" class="flex items-center text-gray-300 hover:text-orange-400 social-link transition-colors" target="_blank">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.23 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.72V1.72C24 .77 23.21 0 22.23 0zM7.12 20.45H3.56V9.06h3.56v11.39zM5.34 7.67c-1.14 0-2.06-.92-2.06-2.06 0-1.14.92-2.06 2.06-2.06s2.06.92 2.06 2.06c0 1.14-.92 2.06-2.06 2.06zm15.11 12.78h-3.56v-5.56c0-1.33-.03-3.03-1.85-3.03-1.85 0-2.13 1.44-2.13 2.94v5.65H9.3V9.06h3.41v1.55h.05c.47-.89 1.62-1.83 3.34-1.83 3.57 0 4.23 2.35 4.23 5.41v6.26z"/></svg>
+                    chefemedeiros
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // O JavaScript foi adaptado para o novo curso (NR-12)
+        const totalModules = 10;
+        let completedModules = JSON.parse(localStorage.getItem('gateBombeiroNR12CompletedModules')) || [];
+        let quizAnswers = JSON.parse(localStorage.getItem('gateBombeiroNR12QuizAnswers')) || {};
+
+        const correctAnswers = {
+            'module1-q1': 'a', 'module1-q2': 'c', 'module1-q3': 'b', 'module1-q4': 'c', 'module1-q5': 'c',
+            'module2-q1': 'b', 'module2-q2': 'a', 'module2-q3': 'b', 'module2-q4': 'c', 'module2-q5': 'b',
+            'module3-q1': 'b', 'module3-q2': 'b', 'module3-q3': 'b', 'module3-q4': 'b', 'module3-q5': 'b',
+            'module4-q1': 'b', 'module4-q2': 'b', 'module4-q3': 'b', 'module4-q4': 'c', 'module4-q5': 'b',
+            'module5-q1': 'b', 'module5-q2': 'b', 'module5-q3': 'b', 'module5-q4': 'b', 'module5-q5': 'c',
+            'module6-q1': 'b', 'module6-q2': 'c', 'module6-q3': 'b', 'module6-q4': 'c', 'module6-q5': 'b',
+            'module7-q1': 'b', 'module7-q2': 'c', 'module7-q3': 'b', 'module7-q4': 'b', 'module7-q5': 'b',
+            'module8-q1': 'b', 'module8-q2': 'b', 'module8-q3': 'b', 'module8-q4': 'b', 'module8-q5': 'a',
+            'module9-q1': 'b', 'module9-q2': 'b', 'module9-q3': 'a', 'module9-q4': 'b', 'module9-q5': 'c',
+            'module10-q1': 'b', 'module10-q2': 'b', 'module10-q3': 'a', 'module10-q4': 'a', 'module10-q5': 'b',
+        };
+
+        const moduleContent = {
+            initial: { 
+                title: "Bem-vindo ao Curso de NR-12!", 
+                iconClass: "fas fa-tools", 
+                content: `<p class="text-gray-700 mb-3">Aprenda a neutralizar os perigos de máquinas industriais e lidere resgates em ambientes complexos com total segurança.</p><p class="text-gray-700 mb-3">Prensas, tornos, esteiras e outros equipamentos industriais são responsáveis por 25% de todos os acidentes em indústrias. Para o bombeiro civil, um chamado para um resgate em uma fábrica significa entrar em um ambiente onde o risco de esmagamento, cortes e choques elétricos é constante. Este curso teórico sobre a NR-12 é sua capacitação essencial para identificar máquinas perigosas, compreender seus sistemas de segurança e planejar intervenções que garantam a segurança da vítima e de toda a sua equipe.</p><p class="text-gray-700 mb-3">Público-alvo: Bombeiros Civis que atuam ou desejam atuar em resgates no setor industrial, onde a presença de máquinas e equipamentos representa um risco significativo. Carga Horária: 20 horas. Certificação: Certificado de conclusão "Curso Teórico", assinado por um técnico em segurança do trabalho, emitido após aprovação mínima de 80% nos testes.</p>` 
+            },
+            module1: { 
+                id: "module1", 
+                title: "1. Introdução à NR-12: O Universo das Máquinas Industriais", 
+                iconClass: "fas fa-tools", 
+                content: `<p>Bem-vindo ao curso da NR-12. Este módulo inicial apresenta a Norma Regulamentadora 12 como seu principal guia para atuar com segurança em ambientes industriais. O objetivo central desta norma, conforme seu item 12.1, é estabelecer os requisitos mínimos para a prevenção de acidentes e doenças do trabalho nas fases de projeto e de utilização de máquinas e equipamentos de todos os tipos.</p><p>Para o bombeiro civil, o conhecimento da NR-12 é uma ferramenta de sobrevivência. Imagine ser chamado para um resgate em uma fábrica têxtil; o conhecimento prévio de que máquinas como prensas devem estar completamente paradas e bloqueadas é o que previne lesões graves tanto na vítima quanto nos socorristas durante a operação. A norma busca reduzir o alarmante número de acidentes com máquinas, que representam um quarto de todos os incidentes industriais. Este curso é, portanto, sua capacitação para entrar nesses ambientes e neutralizar os perigos antes mesmo de iniciar o resgate.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual é o principal objetivo da NR-12?</p><div class="quiz-options-group" data-module-id="module1"><div class="quiz-option" data-question="module1-q1" data-answer="a">a) Estabelecer medidas de segurança para o trabalho em máquinas e equipamentos.</div><div class="quiz-option" data-question="module1-q1" data-answer="b">b) Definir as normas para o controle de produtos inflamáveis.</div><div class="quiz-option" data-question="module1-q1" data-answer="c">c) Regular as práticas de ergonomia no ambiente de trabalho.</div></div><p id="explanation-module1-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Em qual tipo de ambiente os bombeiros enfrentam riscos diretamente ligados à NR-12?</p><div class="quiz-options-group" data-module-id="module1"><div class="quiz-option" data-question="module1-q2" data-answer="a">a) Escritórios comerciais.</div><div class="quiz-option" data-question="module1-q2" data-answer="b">b) Escolas e hospitais.</div><div class="quiz-option" data-question="module1-q2" data-answer="c">c) Indústrias.</div></div><p id="explanation-module1-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Qual é a porcentagem de acidentes industriais que envolvem máquinas e equipamentos?</p><div class="quiz-options-group" data-module-id="module1"><div class="quiz-option" data-question="module1-q3" data-answer="a">a) 10%.</div><div class="quiz-option" data-question="module1-q3" data-answer="b">b) 25%.</div><div class="quiz-option" data-question="module1-q3" data-answer="c">c) 50%.</div></div><p id="explanation-module1-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. Um resgate em uma fábrica têxtil, com máquinas como prensas, é um exemplo de aplicação de qual norma?</p><div class="quiz-options-group" data-module-id="module1"><div class="quiz-option" data-question="module1-q4" data-answer="a">a) NR-10.</div><div class="quiz-option" data-question="module1-q4" data-answer="b">b) NR-20.</div><div class="quiz-option" data-question="module1-q4" data-answer="c">c) NR-12.</div></div><p id="explanation-module1-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. Qual item da norma estabelece seu objetivo geral de aplicação?</p><div class="quiz-options-group" data-module-id="module1"><div class="quiz-option" data-question="module1-q5" data-answer="a">a) Item 12.5.</div><div class="quiz-option" data-question="module1-q5" data-answer="b">b) Item 12.3.</div><div class="quiz-option" data-question="module1-q5" data-answer="c">c) Item 12.1.</div></div><p id="explanation-module1-q5" class="explanation hidden"></p>` 
+            },
+            module2: { 
+                id: "module2", 
+                title: "2. Riscos Mecânicos: Esmagamento, Corte e Outras Ameaças", 
+                iconClass: "fas fa-exclamation-triangle", 
+                content: `<p>Este módulo foca nos perigos mais diretos e violentos apresentados pelas máquinas: os riscos mecânicos. São eles que causam acidentes como esmagamentos, cortes, amputações e aprisionamento. É fundamental que o bombeiro saiba identificar esses riscos para avaliar a segurança da cena.</p><p>A NR-12 abrange uma vasta gama de equipamentos, como prensas, tornos e empilhadeiras. Cada um apresenta riscos mecânicos específicos:</p><ul><li>Prensas: Oferecem um altíssimo risco de esmagamento, seja de membros ou do corpo inteiro, durante seu ciclo de operação.</li><li>Tornos: Apresentam risco de aprisionamento e arrastamento de roupas ou cabelos por suas partes giratórias, além de risco de corte.</li><li>Serras e Guilhotinas: O risco principal é o de corte e amputação.</li></ul><p>Ao chegar a um local de acidente, uma das primeiras ações do bombeiro deve ser a identificação das máquinas perigosas e dos riscos mecânicos que elas oferecem antes de qualquer intervenção. A avaliação visual das partes móveis, pontos de prensagem e zonas de corte é crucial para planejar uma aproximação segura à vítima.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual é o principal risco mecânico associado a uma prensa industrial?</p><div class="quiz-options-group" data-module-id="module2"><div class="quiz-option" data-question="module2-q1" data-answer="a">a) Exposição a produtos químicos.</div><div class="quiz-option" data-question="module2-q1" data-answer="b">b) Esmagamento.</div><div class="quiz-option" data-question="module2-q1" data-answer="c">c) Ruído excessivo.</div></div><p id="explanation-module2-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Riscos de corte e esmagamento são classificados como que tipo de risco?</p><div class="quiz-options-group" data-module-id="module2"><div class="quiz-option" data-question="module2-q2" data-answer="a">a) Riscos mecânicos.</div><div class="quiz-option" data-question="module2-q2" data-answer="b">b) Riscos químicos.</div><div class="quiz-option" data-question="module2-q2" data-answer="c">c) Riscos térmicos.</div></div><p id="explanation-module2-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Antes de iniciar uma intervenção de resgate, qual é a prioridade do bombeiro em relação às máquinas?</p><div class="quiz-options-group" data-module-id="module2"><div class="quiz-option" data-question="module2-q3" data-answer="a">a) Documentar o nome do fabricante da máquina.</div><div class="quiz-option" data-question="module2-q3" data-answer="b">b) Identificar as máquinas perigosas e seus riscos.</div><div class="quiz-option" data-question="module2-q3" data-answer="c">c) Calcular o tempo de parada da produção.</div></div><p id="explanation-module2-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. Prensas, tornos e empilhadeiras são exemplos de equipamentos cobertos por qual norma?</p><div class="quiz-options-group" data-module-id="module2"><div class="quiz-option" data-question="module2-q4" data-answer="a">a) NR-10.</div><div class="quiz-option" data-question="module2-q4" data-answer="b">b) NR-20.</div><div class="quiz-option" data-question="module2-q4" data-answer="c">c) NR-12.</div></div><p id="explanation-module2-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. O que um bombeiro deve avaliar visualmente em uma máquina para identificar riscos mecânicos?</p><div class="quiz-options-group" data-module-id="module2"><div class="quiz-option" data-question="module2-q5" data-answer="a">a) A cor e o design da máquina.</div><div class="quiz-option" data-question="module2-q5" data-answer="b">b) As partes móveis, pontos de prensagem e zonas de corte.</div><div class="quiz-option" data-question="module2-q5" data-answer="c">c) O manual de instruções do equipamento.</div></div><p id="explanation-module2-q5" class="explanation hidden"></p>` 
+            },
+            module3: { 
+                id: "module3", 
+                title: "3. Riscos Não-Mecânicos: Perigos Elétricos e Ergonômicos em Máquinas", 
+                iconClass: "fas fa-plug", 
+                content: `<p>Além dos perigos mecânicos óbvios, as máquinas apresentam outros riscos que são igualmente perigosos, mas muitas vezes menos visíveis. Este módulo aborda os riscos não-mecânicos, com foco nos perigos elétricos e ergonômicos.</p><p>Riscos Elétricos: Praticamente toda máquina industrial é alimentada por energia elétrica. Isso introduz o risco de choques elétricos, seja por contato com fiações expostas, painéis abertos ou falhas de aterramento que energizam a carcaça do equipamento. Um acidente que imobiliza um trabalhador em uma máquina pode ter sido causado por um choque elétrico, e o bombeiro precisa estar ciente desse perigo antes de tocar na vítima ou no equipamento. A falta de manutenção elétrica é uma causa comum para este tipo de acidente.</p><p>Riscos Ergonômicos: Embora mais associados a doenças do trabalho, os riscos ergonômicos também podem ser um fator em acidentes. Posturas inadequadas, esforço excessivo ou movimentos repetitivos podem levar a um erro humano que resulta em um acidente grave.</p><p>Para uma atuação segura, o bombeiro deve realizar uma avaliação de riscos completa, que não se limite apenas às partes móveis, mas que inclua a verificação de possíveis fontes de energia elétrica e outros perigos associados à operação da máquina.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual risco elétrico é comum em máquinas e equipamentos industriais?</p><div class="quiz-options-group" data-module-id="module3"><div class="quiz-option" data-question="module3-q1" data-answer="a">a) Exposição a radiação.</div><div class="quiz-option" data-question="module3-q1" data-answer="b">b) Choque elétrico.</div><div class="quiz-option" data-question="module3-q1" data-answer="c">c) Exposição química.</div></div><p id="explanation-module3-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Um choque elétrico ao tocar na carcaça de uma máquina pode ser causado por:</p><div class="quiz-options-group" data-module-id="module3"><div class="quiz-option" data-question="module3-q2" data-answer="a">a) Excesso de velocidade da máquina.</div><div class="quiz-option" data-question="module3-q2" data-answer="b">b) Falta de manutenção elétrica e falha de aterramento.</div><div class="quiz-option" data-question="module3-q2" data-answer="c">c) Iluminação inadequada do ambiente.</div></div><p id="explanation-module3-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Além dos riscos mecânicos e elétricos, qual outro tipo de risco a NR-12 considera?</p><div class="quiz-options-group" data-module-id="module3"><div class="quiz-option" data-question="module3-q3" data-answer="a">a) Riscos financeiros.</div><div class="quiz-option" data-question="module3-q3" data-answer="b">b) Riscos ergonômicos.</div><div class="quiz-option" data-question="module3-q3" data-answer="c">c) Riscos de mercado.</div></div><p id="explanation-module3-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que um bombeiro deve fazer antes de tocar em uma vítima presa a uma máquina?</p><div class="quiz-options-group" data-module-id="module3"><div class="quiz-option" data-question="module3-q4" data-answer="a">a) Tentar puxá-la imediatamente.</div><div class="quiz-option" data-question="module3-q4" data-answer="b">b) Considerar o risco de a máquina estar energizada e garantir o corte de energia.</div><div class="quiz-option" data-question="module3-q4" data-answer="c">c) Verificar se a vítima está usando os EPIs corretos.</div></div><p id="explanation-module3-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. Por que a avaliação de riscos feita por um bombeiro não deve se limitar apenas aos perigos de esmagamento?</p><div class="quiz-options-group" data-module-id="module3"><div class="quiz-option" data-question="module3-q5" data-answer="a">a) Porque a norma exige um relatório completo.</div><div class="quiz-option" data-question="module3-q5" data-answer="b">b) Porque existem outros riscos, como os elétricos, que podem ser fatais para a equipe.</div><div class="quiz-option" data-question="module3-q5" data-answer="c">c) Porque os riscos ergonômicos são os mais perigosos.</div></div><p id="explanation-module3-q5" class="explanation hidden"></p>` 
+            },
+            module4: { 
+                id: "module4", 
+                title: "4. Sistemas de Proteção Coletiva: Barreiras Físicas e Proteções Fixas", 
+                iconClass: "fas fa-shield-alt", 
+                content: `<p>A maneira mais eficaz de prevenir acidentes com máquinas é impedir o acesso às zonas de perigo. Este módulo é dedicado às Medidas de Proteção Coletiva, com foco nas barreiras físicas, que são as proteções fixas ou móveis instaladas nas máquinas.</p><p>Reguladas pelos anexos da NR-12, essas proteções são projetadas para criar uma barreira física entre o trabalhador e as partes perigosas da máquina. Os principais tipos são:</p><ul><li>Proteções Fixas: São barreiras que só podem ser removidas com o uso de ferramentas, garantindo que permaneçam no lugar durante a operação normal. Um exemplo é uma grade de proteção aparafusada ao redor de uma engrenagem.</li><li>Proteções Móveis: São barreiras que podem ser abertas sem o uso de ferramentas, como uma porta de acesso. Elas devem estar associadas a dispositivos de intertravamento, que param a máquina automaticamente quando a proteção é aberta.</li></ul><p>Um exemplo prático é a instalação de uma barreira em um torno, que impede que o operador tenha contato com as partes giratórias da máquina. A falha ou a remoção dessas proteções é uma causa comum de acidentes graves, como o caso de esmagamento em uma prensa que ocorreu devido a uma falha na barreira de proteção. Ao chegar a um local de acidente, o bombeiro deve verificar a integridade dessas barreiras.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual é a principal função de uma barreira física em uma máquina?</p><div class="quiz-options-group" data-module-id="module4"><div class="quiz-option" data-question="module4-q1" data-answer="a">a) Reduzir o ruído da operação.</div><div class="quiz-option" data-question="module4-q1" data-answer="b">b) Impedir o contato do trabalhador com as partes perigosas.</div><div class="quiz-option" data-question="module4-q1" data-answer="c">c) Servir como apoio para ferramentas.</div></div><p id="explanation-module4-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. A falha em uma barreira de proteção de uma prensa foi a causa de qual tipo de acidente no estudo de caso?</p><div class="quiz-options-group" data-module-id="module4"><div class="quiz-option" data-question="module4-q2" data-answer="a">a) Choque elétrico.</div><div class="quiz-option" data-question="module4-q2" data-answer="b">b) Esmagamento.</div><div class="quiz-option" data-question="module4-q2" data-answer="c">c) Incêndio.</div></div><p id="explanation-module4-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Qual medida de proteção é utilizada para evitar o contato com as partes móveis de um torno?</p><div class="quiz-options-group" data-module-id="module4"><div class="quiz-option" data-question="module4-q3" data-answer="a">a) Sensores de calor.</div><div class="quiz-option" data-question="module4-q3" data-answer="b">b) Barreiras físicas.</div><div class="quiz-option" data-question="module4-q3" data-answer="c">c) Alarmes sonoros.</div></div><p id="explanation-module4-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que o bombeiro deve verificar em relação às proteções da máquina antes de um resgate?</p><div class="quiz-options-group" data-module-id="module4"><div class="quiz-option" data-question="module4-q4" data-answer="a">a) A data de fabricação das barreiras.</div><div class="quiz-option" data-question="module4-q4" data-answer="b">b) A cor e o material das proteções.</div><div class="quiz-option" data-question="module4-q4" data-answer="c">c) A presença e a integridade das medidas de proteção.</div></div><p id="explanation-module4-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. As normas para barreiras e proteções são reguladas principalmente em qual parte da NR-12?</p><div class="quiz-options-group" data-module-id="module4"><div class="quiz-option" data-question="module4-q5" data-answer="a">a) No item 12.1.</div><div class="quiz-option" data-question="module4-q5" data-answer="b">b) Nos anexos da norma.</div><div class="quiz-option" data-question="module4-q5" data-answer="c">c) No item 12.3.</div></div><p id="explanation-module4-q5" class="explanation hidden"></p>` 
+            },
+            module5: { 
+                id: "module5", 
+                title: "5. Dispositivos de Segurança: Sensores e Paradas de Emergência", 
+                iconClass: "fas fa-exclamation-circle", 
+                content: `<p>Além das barreiras físicas, as máquinas modernas contam com dispositivos de segurança eletrônicos e de acionamento que são cruciais para a prevenção de acidentes. Este módulo aborda esses sistemas, com foco nos sensores e dispositivos de parada.</p><p>Sensores de Segurança: São dispositivos, como cortinas de luz, que detectam a presença de uma pessoa ou parte do corpo em uma zona de perigo e param a máquina automaticamente. O exemplo do resgate em uma fábrica onde uma prensa foi parada por um sensor, evitando um esmagamento, ilustra perfeitamente a eficácia desses sistemas. A falha em um sensor, por outro lado, pode ser catastrófica.</p><p>Dispositivos de Parada de Emergência: Conforme o item 12.6, toda máquina deve possuir um ou mais dispositivos de parada de emergência, como os botões de emergência (geralmente vermelhos em formato de cogumelo). Eles devem ser posicionados em locais de fácil acesso para que possam ser acionados rapidamente em caso de perigo, parando a máquina imediatamente. Em uma situação de resgate de um trabalhador preso, acionar a parada de emergência é uma das primeiras ações que o bombeiro deve tomar.</p><p>Conhecer a localização e o funcionamento desses dispositivos é uma competência tática essencial para a equipe de resgate.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual dispositivo de segurança detecta a presença de uma pessoa na zona de risco e para a máquina automaticamente?</p><div class="quiz-options-group" data-module-id="module5"><div class="quiz-option" data-question="module5-q1" data-answer="a">a) O alarme sonoro.</div><div class="quiz-option" data-question="module5-q1" data-answer="b">b) O sensor de segurança.</div><div class="quiz-option" data-question="module5-q1" data-answer="c">c) A luz de indicação.</div></div><p id="explanation-module5-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Qual dispositivo deve ser acionado para uma parada imediata da máquina em uma situação de perigo?</p><div class="quiz-options-group" data-module-id="module5"><div class="quiz-option" data-question="module5-q2" data-answer="a">a) O botão de ligar/desligar padrão.</div><div class="quiz-option" data-question="module5-q2" data-answer="b">b) O dispositivo de parada de emergência.</div><div class="quiz-option" data-question="module5-q2" data-answer="c">c) O disjuntor no painel elétrico.</div></div><p id="explanation-module5-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. No exemplo prático, o que evitou o esmagamento de um trabalhador por uma prensa?</p><div class="quiz-options-group" data-module-id="module5"><div class="quiz-option" data-question="module5-q3" data-answer="a">a) O uso de um capacete.</div><div class="quiz-option" data-question="module5-q3" data-answer="b">b) A parada da máquina por um sensor de segurança.</div><div class="quiz-option" data-question="module5-q3" data-answer="c">c) O uso de luvas especiais.</div></div><p id="explanation-module5-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. Conforme o item 12.6, qual dispositivo é obrigatório em todas as máquinas?</p><div class="quiz-options-group" data-module-id="module5"><div class="quiz-option" data-question="module5-q4" data-answer="a">a) Um sistema de refrigeração a água.</div><div class="quiz-option" data-question="module5-q4" data-answer="b">b) Um dispositivo de parada de emergência.</div><div class="quiz-option" data-question="module5-q4" data-answer="c">c) Um contador de peças.</div></div><p id="explanation-module5-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. A falha de um sensor de segurança em uma prensa foi a causa de qual tipo de acidente?</p><div class="quiz-options-group" data-module-id="module5"><div class="quiz-option" data-question="module5-q5" data-answer="a">a) Choque elétrico.</div><div class="quiz-option" data-question="module5-q5" data-answer="b">b) Incêndio.</div><div class="quiz-option" data-question="module5-q5" data-answer="c">c) Esmagamento.</div></div><p id="explanation-module5-q5" class="explanation hidden"></p>` 
+            },
+            module6: { 
+                id: "module6", 
+                title: "6. Planejamento de Segurança: Análise de Riscos e Ergonomia", 
+                iconClass: "fas fa-tasks", 
+                content: `<p>A segurança em máquinas não se resume a instalar proteções; ela começa muito antes, na fase de planejamento. Este módulo aborda a importância do planejamento de segurança, que inclui a análise de riscos e a ergonomia, conforme o item 12.9 da norma.</p><p>O planejamento de um ambiente de trabalho seguro com máquinas deve incluir:</p><ul><li>Análise de Riscos: Antes mesmo de uma máquina ser instalada, todos os riscos que ela pode gerar (mecânicos, elétricos, etc.) devem ser analisados e as medidas de controle devem ser definidas.</li><li>Ergonomia: A máquina e o posto de trabalho devem ser projetados para se adaptar às características do trabalhador, evitando posturas inadequadas, esforço excessivo e movimentos repetitivos que podem levar à fadiga e a erros que causam acidentes.</li></ul><p>Para um bombeiro, esse conceito de planejamento se traduz em sua própria metodologia de atuação. Antes de qualquer operação de resgate em um ambiente industrial, a equipe deve realizar sua própria Análise Preliminar de Riscos (APR). Essa análise permite que a equipe planeje a intervenção de forma segura, considerando todos os riscos das máquinas e do ambiente, e definindo as medidas de controle necessárias para proteger a si mesma e à vítima. A norma exige que os trabalhadores recebam treinamentos teóricos sobre esses procedimentos, reforçando a importância do planejamento.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. De acordo com o item 12.9, o que o planejamento de segurança para máquinas deve incluir?</p><div class="quiz-options-group" data-module-id="module6"><div class="quiz-option" data-question="module6-q1" data-answer="a">a) Um plano de redução de custos.</div><div class="quiz-option" data-question="module6-q1" data-answer="b">b) A análise de riscos e a ergonomia.</div><div class="quiz-option" data-question="module6-q1" data-answer="c">c) Um cronograma de aumento da produção.</div></div><p id="explanation-module6-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Qual ferramenta o bombeiro utiliza para planejar uma operação segura em um ambiente industrial?</p><div class="quiz-options-group" data-module-id="module6"><div class="quiz-option" data-question="module6-q2" data-answer="a">a) Um mapa de risco financeiro.</div><div class="quiz-option" data-question="module6-q2" data-answer="b">b) Um relatório de produção.</div><div class="quiz-option" data-question="module6-q2" data-answer="c">c) A Análise Preliminar de Riscos (APR).</div></div><p id="explanation-module6-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Qual o objetivo da ergonomia no projeto de máquinas?</p><div class="quiz-options-group" data-module-id="module6"><div class="quiz-option" data-question="module6-q3" data-answer="a">a) Aumentar a velocidade da máquina.</div><div class="quiz-option" data-question="module6-q3" data-answer="b">b) Adaptar a máquina ao trabalhador para evitar fadiga e acidentes.</div><div class="quiz-option" data-question="module6-q3" data-answer="c">c) Reduzir o consumo de energia do equipamento.</div></div><p id="explanation-module6-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que a NR-12 exige para garantir que os trabalhadores atuem com segurança?</p><div class="quiz-options-group" data-module-id="module6"><div class="quiz-option" data-question="module6-q4" data-answer="a">a) A contratação de mais funcionários.</div><div class="quiz-option" data-question="module6-q4" data-answer="b">b) O uso de equipamentos pesados.</div><div class="quiz-option" data-question="module6-q4" data-answer="c">c) A realização de treinamentos teóricos.</div></div><p id="explanation-module6-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. Ao planejar um resgate em uma fábrica, qual é a prioridade da equipe de bombeiros em relação aos riscos?</p><div class="quiz-options-group" data-module-id="module6"><div class="quiz-option" data-question="module6-q5" data-answer="a">a) O estoque de materiais da fábrica.</div><div class="quiz-option" data-question="module6-q5" data-answer="b">b) Os riscos apresentados pelas máquinas no local.</div><div class="quiz-option" data-question="module6-q5" data-answer="c">c) A iluminação geral do ambiente.</div></div><p id="explanation-module6-q5" class="explanation hidden"></p>` 
+            },
+            module7: { 
+                id: "module7", 
+                title: "7. Procedimentos de Manutenção e Inspeção Segura", 
+                iconClass: "fas fa-wrench", 
+                content: `<p>Uma máquina segura é uma máquina com a manutenção em dia. Este módulo aborda a importância crítica da manutenção e das inspeções regulares, que são exigências da NR-12 para garantir que as proteções e os dispositivos de segurança continuem funcionando corretamente ao longo do tempo.</p><p>A norma exige que as máquinas passem por manutenção regular. A falta de manutenção é uma causa direta de acidentes graves. O Estudo de Caso 2 ilustra isso com clareza: um trabalhador sofreu um choque elétrico em uma máquina porque a manutenção elétrica não estava em dia, violando o item 12.11 da norma.</p><p>Além da manutenção corretiva (após uma falha), a manutenção preventiva é fundamental. Isso inclui:</p><ul><li>Inspeções Regulares: Verificar periodicamente o estado das barreiras físicas, o funcionamento dos sensores e dos botões de emergência.</li><li>Testes de Sensores: Os sensores de segurança que falham podem levar a acidentes de esmagamento, por isso, testes regulares são essenciais para evitar acidentes.</li></ul><p>Para um bombeiro, ao chegar em um local de acidente, a informação sobre o histórico de manutenção da máquina pode fornecer pistas importantes sobre a causa do incidente. Um acidente em uma indústria de plásticos, por exemplo, foi causado pelo travamento de uma máquina devido à falta de manutenção, exigindo o corte de energia para o resgate.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. O que a NR-12 exige para garantir o bom funcionamento contínuo das máquinas?</p><div class="quiz-options-group" data-module-id="module7"><div class="quiz-option" data-question="module7-q1" data-answer="a">a) Um aumento constante da produção.</div><div class="quiz-option" data-question="module7-q1" data-answer="b">b) A realização de manutenção regular.</div><div class="quiz-option" data-question="module7-q1" data-answer="c">c) Uma redução nos custos operacionais.</div></div><p id="explanation-module7-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. No estudo de caso, o que causou o choque elétrico no trabalhador que operava a máquina?</p><div class="quiz-options-group" data-module-id="module7"><div class="quiz-option" data-question="module7-q2" data-answer="a">a) Um vazamento de produto químico.</div><div class="quiz-option" data-question="module7-q2" data-answer="b">b) Uma queda de material.</div><div class="quiz-option" data-question="module7-q2" data-answer="c">c) A falta de manutenção elétrica no equipamento.</div></div><p id="explanation-module7-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Qual item da norma é violado quando a manutenção elétrica de uma máquina é negligenciada?</p><div class="quiz-options-group" data-module-id="module7"><div class="quiz-option" data-question="module7-q3" data-answer="a">a) Item 12.1.</div><div class="quiz-option" data-question="module7-q3" data-answer="b">b) Item 12.11.</div><div class="quiz-option" data-question="module7-q3" data-answer="c">c) Item 12.3.</div></div><p id="explanation-module7-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que as inspeções regulares em tornos e outras máquinas ajudam a evitar?</p><div class="quiz-options-group" data-module-id="module7"><div class="quiz-option" data-question="module7-q4" data-answer="a">a) Apenas o desgaste natural das peças.</div><div class="quiz-option" data-question="module7-q4" data-answer="b">b) Acidentes causados por falhas em componentes de segurança.</div><div class="quiz-option" data-question="module7-q4" data-answer="c">c) A necessidade de iluminação extra.</div></div><p id="explanation-module7-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. A lição aprendida no caso do acidente por falha no sensor de segurança foi a importância de:</p><div class="quiz-options-group" data-module-id="module7"><div class="quiz-option" data-question="module7-q5" data-answer="a">a) Aumentar a ventilação do local.</div><div class="quiz-option" data-question="module7-q5" data-answer="b">b) Realizar testes regulares nos sensores.</div><div class="quiz-option" data-question="module7-q5" data-answer="c">c) Reduzir a temperatura da máquina.</div></div><p id="explanation-module7-q5" class="explanation hidden"></p>` 
+            },
+            module8: { 
+                id: "module8", 
+                title: "8. Atuação do Bombeiro em Emergências com Máquinas", 
+                iconClass: "fas fa-user-shield", 
+                content: `<p>Este módulo é o coração da aplicação da NR-12 para o bombeiro civil. Ele consolida o conhecimento em um plano de ação tático para atuar em emergências envolvendo máquinas. A prioridade máxima em qualquer operação é sempre a segurança da equipe.</p><p>O plano de resgate deve seguir uma sequência lógica:</p><ul><li>Avaliação Rápida da Cena: Utilizar a Análise Preliminar de Riscos (APR) para identificar os perigos imediatos (máquina em operação, riscos elétricos, etc.).</li><li>Parada Imediata da Máquina: A primeira ação prática é a parada imediata das operações. Isso deve ser feito acionando os botões de emergência ou outros dispositivos de parada, que devem estar acessíveis.</li><li>Verificação dos Sistemas de Parada: Antes de qualquer aproximação, o bombeiro deve verificar se os sistemas de parada estão realmente funcionais e se a máquina não pode ser religada acidentalmente.</li><li>Corte de Energia: Em muitos casos, especialmente em indústrias de plásticos ou metalúrgicas, o corte de energia geral da máquina é a medida mais segura para evitar esmagamentos ou outros acidentes durante a retirada da vítima.</li></ul><p>Um exemplo prático é o resgate em uma fábrica de alimentos, onde a primeira ação coordenada pelos bombeiros é a parada de uma esteira transportadora para liberar um trabalhador preso.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. Qual é a prioridade máxima para a equipe de bombeiros durante um resgate?</p><div class="quiz-options-group" data-module-id="module8"><div class="quiz-option" data-question="module8-q1" data-answer="a">a) A velocidade da operação.</div><div class="quiz-option" data-question="module8-q1" data-answer="b">b) A segurança da equipe.</div><div class="quiz-option" data-question="module8-q1" data-answer="c">c) A redução de custos.</div></div><p id="explanation-module8-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Qual dispositivo o bombeiro deve acionar para uma parada imediata da máquina?</p><div class="quiz-options-group" data-module-id="module8"><div class="quiz-option" data-question="module8-q2" data-answer="a">a) O botão de ligar/desligar padrão.</div><div class="quiz-option" data-question="module8-q2" data-answer="b">b) O dispositivo de parada de emergência.</div><div class="quiz-option" data-question="module8-q2" data-answer="c">c) O disjuntor no painel elétrico.</div></div><p id="explanation-module8-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. No exemplo prático, o que evitou o esmagamento de um trabalhador por uma prensa?</p><div class="quiz-options-group" data-module-id="module8"><div class="quiz-option" data-question="module8-q3" data-answer="a">a) O uso de um capacete.</div><div class="quiz-option" data-question="module8-q3" data-answer="b">b) A parada da máquina por um sensor de segurança.</div><div class="quiz-option" data-question="module8-q3" data-answer="c">c) O uso de luvas especiais.</div></div><p id="explanation-module8-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. Conforme o item 12.6, qual dispositivo é obrigatório em todas as máquinas?</p><div class="quiz-options-group" data-module-id="module8"><div class="quiz-option" data-question="module8-q4" data-answer="a">a) Um sistema de refrigeração a água.</div><div class="quiz-option" data-question="module8-q4" data-answer="b">b) Um dispositivo de parada de emergência.</div><div class="quiz-option" data-question="module8-q4" data-answer="c">c) Um contador de peças.</div></div><p id="explanation-module8-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. A falha de um sensor de segurança em uma prensa foi a causa de qual tipo de acidente?</p><div class="quiz-options-group" data-module-id="module8"><div class="quiz-option" data-question="module8-q5" data-answer="a">a) Choque elétrico.</div><div class="quiz-option" data-question="module8-q5" data-answer="b">b) Incêndio.</div><div class="quiz-option" data-question="module8-q5" data-answer="c">c) Esmagamento.</div></div><p id="explanation-module8-q5" class="explanation hidden"></p>` 
+            },
+            module9: { 
+                id: "module9", 
+                title: "9. Estudos de Caso e Lições Aprendidas", 
+                iconClass: "fas fa-book", 
+                content: `<p>Este módulo analisa casos reais de acidentes com máquinas para extrair lições valiosas. Aprender com erros alheios é essencial para evitar repeti-los.</p><p>Estudo de Caso 1: Esmagamento em Prensa por Falha na Barreira de Proteção. Um trabalhador sofreu esmagamento em uma prensa devido a uma falha na barreira de proteção, violando as normas de manutenção. Lição: A integridade das proteções deve ser verificada regularmente.</p><p>Estudo de Caso 2: Choque Elétrico por Falta de Manutenção. Um acidente ocorreu devido à falta de manutenção elétrica em uma máquina, destacando a importância do item 12.11. Lição: A manutenção preventiva é crucial para prevenir riscos elétricos.</p><p>Para o bombeiro, esses casos reforçam a necessidade de uma avaliação rápida da cena, identificando falhas em proteções e sistemas de segurança antes da intervenção.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. No primeiro estudo de caso, o que causou o esmagamento em uma prensa?</p><div class="quiz-options-group" data-module-id="module9"><div class="quiz-option" data-question="module9-q1" data-answer="a">a) Falha no sensor de temperatura.</div><div class="quiz-option" data-question="module9-q1" data-answer="b">b) Falha na barreira de proteção.</div><div class="quiz-option" data-question="module9-q1" data-answer="c">c) Excesso de velocidade da máquina.</div></div><p id="explanation-module9-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Qual foi a causa do choque elétrico no segundo estudo de caso?</p><div class="quiz-options-group" data-module-id="module9"><div class="quiz-option" data-question="module9-q2" data-answer="a">a) Uso incorreto de EPIs.</div><div class="quiz-option" data-question="module9-q2" data-answer="b">b) Falta de manutenção elétrica.</div><div class="quiz-option" data-question="module9-q2" data-answer="c">c) Problema na iluminação do local.</div></div><p id="explanation-module9-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Qual lição principal pode ser extraída do caso de falha em sensores de segurança?</p><div class="quiz-options-group" data-module-id="module9"><div class="quiz-option" data-question="module9-q3" data-answer="a">a) A importância de testes regulares nos sensores.</div><div class="quiz-option" data-question="module9-q3" data-answer="b">b) A necessidade de mais barreiras físicas.</div><div class="quiz-option" data-question="module9-q3" data-answer="c">c) A redução da velocidade das máquinas.</div></div><p id="explanation-module9-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que os estudos de caso reforçam para os bombeiros?</p><div class="quiz-options-group" data-module-id="module9"><div class="quiz-option" data-question="module9-q4" data-answer="a">a) A importância de ignorar as proteções das máquinas.</div><div class="quiz-option" data-question="module9-q4" data-answer="b">b) A necessidade de uma avaliação rápida da cena.</div><div class="quiz-option" data-question="module9-q4" data-answer="c">c) A prioridade em resgates rápidos sem planejamento.</div></div><p id="explanation-module9-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. Qual item da norma é destacado no caso de falta de manutenção elétrica?</p><div class="quiz-options-group" data-module-id="module9"><div class="quiz-option" data-question="module9-q5" data-answer="a">a) Item 12.1.</div><div class="quiz-option" data-question="module9-q5" data-answer="b">b) Item 12.3.</div><div class="quiz-option" data-question="module9-q5" data-answer="c">c) Item 12.11.</div></div><p id="explanation-module9-q5" class="explanation hidden"></p>` 
+            },
+            module10: { 
+                id: "module10", 
+                title: "10. Responsabilidades Legais e Certificação", 
+                iconClass: "fas fa-certificate", 
+                content: `<p>Este módulo final aborda as responsabilidades legais impostas pela NR-12 e o processo de certificação do curso, consolidando sua capacitação teórica.</p><p>A NR-12 define responsabilidades claras:</p><ul><li>Para os Empregadores: Projetar, instalar e manter máquinas seguras, fornecendo treinamentos e EPIs.</li><li>Para os Trabalhadores: Cumprir as normas, usar EPIs corretamente e reportar riscos.</li></ul><p>Como bombeiro, você deve conhecer essas responsabilidades para coordenar resgates em conformidade com a norma, garantindo a segurança da equipe e das vítimas.</p><p>Ao concluir este curso, você receberá um certificado "Curso Teórico", emitido após aprovação mínima de 80% na prova final, assinado por um técnico em segurança do trabalho. Isso comprova sua capacitação teórica para atuar em ambientes industriais com risco de máquinas.</p><hr class="my-6 border-gray-300"><h3 class="text-xl font-semibold mb-4 text-blue-700">Exercícios de Fixação</h3><p class="font-semibold mb-2">1. De acordo com a NR-12, de quem é a responsabilidade de fornecer treinamentos sobre segurança em máquinas?</p><div class="quiz-options-group" data-module-id="module10"><div class="quiz-option" data-question="module10-q1" data-answer="a">a) Dos bombeiros civis.</div><div class="quiz-option" data-question="module10-q1" data-answer="b">b) Dos empregadores.</div><div class="quiz-option" data-question="module10-q1" data-answer="c">c) Dos fornecedores de máquinas.</div></div><p id="explanation-module10-q1" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">2. Qual é a taxa mínima de aprovação para obter o certificado deste curso?</p><div class="quiz-options-group" data-module-id="module10"><div class="quiz-option" data-question="module10-q2" data-answer="a">a) 50%.</div><div class="quiz-option" data-question="module10-q2" data-answer="b">b) 80%.</div><div class="quiz-option" data-question="module10-q2" data-answer="c">c) 100%.</div></div><p id="explanation-module10-q2" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">3. Quem assina o certificado de conclusão do curso?</p><div class="quiz-options-group" data-module-id="module10"><div class="quiz-option" data-question="module10-q3" data-answer="a">a) Um técnico em segurança do trabalho.</div><div class="quiz-option" data-question="module10-q3" data-answer="b">b) Um engenheiro mecânico.</div><div class="quiz-option" data-question="module10-q3" data-answer="c">c) Um gerente de produção.</div></div><p id="explanation-module10-q3" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">4. O que os trabalhadores devem fazer para cumprir a NR-12?</p><div class="quiz-options-group" data-module-id="module10"><div class="quiz-option" data-question="module10-q4" data-answer="a">a) Cumprir as normas, usar EPIs e reportar riscos.</div><div class="quiz-option" data-question="module10-q4" data-answer="b">b) Projetar novas máquinas.</div><div class="quiz-option" data-question="module10-q4" data-answer="c">c) Realizar auditorias financeiras.</div></div><p id="explanation-module10-q4" class="explanation hidden"></p><p class="font-semibold mt-4 mb-2">5. O que o certificado emitido ao final deste curso comprova?</p><div class="quiz-options-group" data-module-id="module10"><div class="quiz-option" data-question="module10-q5" data-answer="a">a) Uma habilitação prática para operar máquinas.</div><div class="quiz-option" data-question="module10-q5" data-answer="b">b) Uma capacitação teórica sobre segurança em máquinas.</div><div class="quiz-option" data-question="module10-q5" data-answer="c">c) Experiência profissional em resgates industriais.</div></div><p id="explanation-module10-q5" class="explanation hidden"></p>` 
+            },
+            finalExam: { 
+                id: "finalExam", 
+                title: "Prova Final - NR-12", 
+                iconClass: "fas fa-graduation-cap", 
+                content: `<p>Você concluiu todos os módulos do curso! Agora é hora de testar seus conhecimentos com a prova final. Você precisa de no mínimo 6 acertos para ser aprovado.</p><div id="exam-questions" class="mt-6"></div><div id="exam-result" class="mt-6 text-lg font-semibold"></div><div class="mt-8 pt-6 border-t border-gray-200 text-right"><button id="submit-exam-button" class="action-button">Corrigir Prova</button><button id="retake-exam-button" class="action-button hidden ml-4">Fazer Novamente</button></div>` 
+            }
+        };
+
+        const finalExamQuestions = [
+            { question: "Qual é o principal objetivo da NR-12?", options: ["Estabelecer medidas de segurança para o trabalho em máquinas e equipamentos", "Definir as normas para o controle de produtos inflamáveis", "Regular as práticas de ergonomia no ambiente de trabalho"], correct: "a" },
+            { question: "Qual é o principal risco mecânico associado a uma prensa industrial?", options: ["Exposição a produtos químicos", "Esmagamento", "Ruído excessivo"], correct: "b" },
+            { question: "Qual risco elétrico é comum em máquinas e equipamentos industriais?", options: ["Exposição a radiação", "Choque elétrico", "Exposição química"], correct: "b" },
+            { question: "Qual é a principal função de uma barreira física em uma máquina?", options: ["Reduzir o ruído da operação", "Impedir o contato do trabalhador com as partes perigosas", "Servir como apoio para ferramentas"], correct: "b" },
+            { question: "Qual dispositivo de segurança detecta a presença de uma pessoa na zona de risco e para a máquina automaticamente?", options: ["O alarme sonoro", "O sensor de segurança", "A luz de indicação"], correct: "b" },
+            { question: "De acordo com o item 12.9, o que o planejamento de segurança para máquinas deve incluir?", options: ["Um plano de redução de custos", "A análise de riscos e a ergonomia", "Um cronograma de aumento da produção"], correct: "b" },
+            { question: "O que a NR-12 exige para garantir o bom funcionamento contínuo das máquinas?", options: ["Um aumento constante da produção", "A realização de manutenção regular", "Uma redução nos custos operacionais"], correct: "b" },
+            { question: "Qual é a prioridade máxima para a equipe de bombeiros durante um resgate?", options: ["A velocidade da operação", "A segurança da equipe", "A redução de custos"], correct: "b" },
+            { question: "No primeiro estudo de caso, o que causou o esmagamento em uma prensa?", options: ["Falha no sensor de temperatura", "Falha na barreira de proteção", "Excesso de velocidade da máquina"], correct: "b" },
+            { question: "De acordo com a NR-12, de quem é a responsabilidade de fornecer treinamentos sobre segurança em máquinas?", options: ["Dos bombeiros civis", "Dos empregadores", "Dos fornecedores de máquinas"], correct: "b" },
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentArea = document.getElementById('content-area');
+            const moduleSelector = document.getElementById('module-selector');
+            if (!contentArea || !moduleSelector) { return; }
+            for (const moduleId in moduleContent) {
+                if (moduleContent.hasOwnProperty(moduleId) && moduleId.startsWith('module')) {
+                    moduleContent[moduleId].content += `<div class="mt-8 pt-6 border-t border-gray-200 text-right"><button id="conclude-btn-${moduleId}" class="action-button conclude-button" data-module="${moduleId}" disabled>Concluir Módulo</button></div>`;
+                }
+            }
+            function populateModuleSelector() {
+                moduleSelector.innerHTML = '<option value="">Escolha um Módulo</option>';
+                Object.values(moduleContent).forEach(module => {
+                    if (module.id) {
+                        const option = document.createElement('option');
+                        option.value = module.id;
+                        option.textContent = module.title;
+                        if (module.id === 'finalExam') {
+                            option.id = 'final-exam-option';
+                            option.disabled = true;
+                        }
+                        moduleSelector.appendChild(option);
+                    }
+                });
+            }
+            function updateProgress() {
+                const moduleCompletions = completedModules.filter(id => id.startsWith('module')).length;
+                const progress = totalModules > 0 ? (moduleCompletions / totalModules) * 100 : 0;
+                document.getElementById('progress-text').textContent = `${progress.toFixed(0)}%`;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                localStorage.setItem('gateBombeiroNR12CompletedModules', JSON.stringify(completedModules));
+                const finalExamOption = document.getElementById('final-exam-option');
+                if (finalExamOption) {
+                    if (moduleCompletions >= totalModules) {
+                        finalExamOption.disabled = false;
+                        if (!finalExamOption.textContent.includes('(Liberada!)')) {
+                            finalExamOption.textContent += " (Liberada!)";
+                        }
+                    } else {
+                        finalExamOption.disabled = true;
+                        finalExamOption.textContent = "Prova Final - NR-12";
+                    }
+                }
+            }
+            function markModuleCompleted(moduleId) {
+                if (!completedModules.includes(moduleId)) {
+                    completedModules.push(moduleId);
+                    updateProgress();
+                }
+            }
+            function checkModuleStatus(moduleId) {
+                if (!moduleId || !moduleContent[moduleId]) { return; }
+                const concludeButton = document.getElementById(`conclude-btn-${moduleId}`);
+                if (!concludeButton) return;
+                if (completedModules.includes(moduleId)) {
+                    concludeButton.disabled = true;
+                    concludeButton.textContent = 'Módulo Concluído';
+                    return;
+                }
+                concludeButton.disabled = false;
+            }
+            function setupQuizListeners(moduleId) {
+                const moduleGroups = contentArea.querySelectorAll(`.quiz-options-group[data-module-id="${moduleId}"]`);
+                moduleGroups.forEach(group => {
+                    const options = group.querySelectorAll('.quiz-option:not([data-listener-added])');
+                    options.forEach(option => {
+                        option.setAttribute('data-listener-added', 'true');
+                        option.addEventListener('click', () => {
+                            const questionId = option.dataset.question;
+                            if (option.disabled) return;
+                            const allOptionsInGroup = group.querySelectorAll(`.quiz-option[data-question="${questionId}"]`);
+                            allOptionsInGroup.forEach(opt => opt.disabled = true);
+                            const selectedAnswer = option.dataset.answer;
+                            const actualCorrectAnswer = correctAnswers[questionId];
+                            const explanationP = document.getElementById(`explanation-${questionId}`);
+                            quizAnswers[questionId] = selectedAnswer;
+                            if (selectedAnswer === actualCorrectAnswer) {
+                                option.classList.add('correct');
+                                explanationP.innerHTML = `<strong class="text-green-700">Correto!</strong>`;
+                            } else {
+                                option.classList.add('incorrect');
+                                const correctOptionEl = group.querySelector(`.quiz-option[data-answer="${actualCorrectAnswer}"]`);
+                                correctOptionEl.classList.add('correct');
+                                explanationP.innerHTML = `<strong class="text-red-700">Incorreto.</strong> A resposta correta foi destacada em verde.`;
+                            }
+                            explanationP.classList.remove('hidden');
+                            localStorage.setItem('gateBombeiroNR12QuizAnswers', JSON.stringify(quizAnswers));
+                            checkModuleStatus(moduleId);
+                        });
+                    });
+                });
+            }
+            function restoreQuizState(moduleId) {
+                const questionsInModule = Object.keys(correctAnswers).filter(key => key.startsWith(moduleId));
+                questionsInModule.forEach(qid => {
+                    if (quizAnswers[qid]) {
+                        const questionGroup = contentArea.querySelector(`.quiz-option[data-question="${qid}"]`)?.closest('.quiz-options-group');
+                        if (!questionGroup) return;
+                        const allOptionsInGroup = questionGroup.querySelectorAll(`.quiz-option[data-question="${qid}"]`);
+                        allOptionsInGroup.forEach(opt => {
+                            opt.disabled = true;
+                            if (opt.dataset.answer === correctAnswers[qid]) {
+                                opt.classList.add('correct');
+                            } else if (opt.dataset.answer === quizAnswers[qid]) {
+                                opt.classList.add('incorrect');
+                            }
+                        });
+                        const explanationP = document.getElementById(`explanation-${qid}`);
+                        if (explanationP) {
+                            explanationP.innerHTML = quizAnswers[qid] === correctAnswers[qid] ? `<strong class="text-green-700">Correto!</strong>` : `<strong class="text-red-700">Incorreto.</strong> A resposta correta foi destacada em verde.`;
+                            explanationP.classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+            function setupConcludeButtonListener(moduleId) {
+                const button = document.getElementById(`conclude-btn-${moduleId}`);
+                if (button) {
+                    button.addEventListener('click', () => {
+                        markModuleCompleted(moduleId);
+                        button.disabled = true;
+                        button.textContent = 'Módulo Concluído';
+                    });
+                }
+            }
+            function loadModuleContent(moduleId) {
+                if (!contentArea) { return; }
+                contentArea.classList.add('fade');
+                setTimeout(() => {
+                    const moduleData = moduleContent[moduleId] || moduleContent['initial'];
+                    contentArea.innerHTML = `<h2 class="text-2xl font-semibold mb-6 flex items-center text-blue-800"><i class="${moduleData.iconClass} mr-3 text-orange-500 fa-fw"></i>${moduleData.title}</h2><div>${moduleData.content}</div>`;
+                    if (moduleId && moduleId.startsWith('module')) {
+                        setupQuizListeners(moduleId);
+                        setupConcludeButtonListener(moduleId);
+                        restoreQuizState(moduleId);
+                        checkModuleStatus(moduleId);
+                    } else if (moduleId === 'finalExam') {
+                        renderFinalExam();
+                    }
+                    contentArea.classList.remove('fade');
+                }, 300);
+            }
+            function renderFinalExam() {
+                const examContainer = document.getElementById('exam-questions');
+                examContainer.innerHTML = finalExamQuestions.map((q, index) => `
+                    <div class="mb-6">
+                        <p class="font-semibold mb-2">${index + 1}. ${q.question}</p>
+                        <div class="quiz-options-group" data-exam-question-id="${index}">
+                            ${q.options.map((opt, i) => `<div class="quiz-option" data-answer="${String.fromCharCode(97 + i)}">${String.fromCharCode(97 + i)}) ${opt}</div>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                examContainer.querySelectorAll('.quiz-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        if (option.parentElement.classList.contains('answered')) return;
+                        option.parentElement.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                    });
+                });
+                document.getElementById('submit-exam-button').addEventListener('click', gradeExam);
+                document.getElementById('retake-exam-button').addEventListener('click', renderFinalExam);
+            }
+            function gradeExam() {
+                let score = 0;
+                finalExamQuestions.forEach((q, index) => {
+                    const questionGroup = contentArea.querySelector(`.quiz-options-group[data-exam-question-id="${index}"]`);
+                    const selectedOption = questionGroup.querySelector('.quiz-option.selected');
+                    questionGroup.classList.add('answered');
+                    if (selectedOption) {
+                        if (selectedOption.dataset.answer === q.correct) {
+                            score++;
+                            selectedOption.classList.add('correct');
+                        } else {
+                            selectedOption.classList.add('incorrect');
+                            const correctOpt = questionGroup.querySelector(`.quiz-option[data-answer="${q.correct}"]`);
+                            if (correctOpt) correctOpt.classList.add('correct');
+                        }
+                    }
+                });
+                const resultContainer = document.getElementById('exam-result');
+                const retakeButton = document.getElementById('retake-exam-button');
+                document.getElementById('submit-exam-button').style.display = 'none';
+                if (score >= 6) {
+                    resultContainer.innerHTML = `<span class="text-green-600">APROVADO!</span> Sua nota: ${score}/10.`;
+                    retakeButton.style.display = 'none';
+                    if (!completedModules.includes('finalExam')) {
+                        markModuleCompleted('finalExam');
+                    }
+                    showCongratulations();
+                    launchConfetti();
+                    showCertificateForm();
+                } else {
+                    resultContainer.innerHTML = `<span class="text-red-600">REPROVADO.</span> Sua nota: ${score}/10.`;
+                    retakeButton.classList.remove('hidden');
+                }
+            }
+            function showCongratulations() {
+                const congratsMessage = document.getElementById('congratulations-message');
+                congratsMessage.classList.remove('hidden');
+                setTimeout(() => congratsMessage.classList.add('show'), 100);
+            }
+            function launchConfetti() {
+                if(typeof confetti === 'function') {
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, zIndex: 9999 });
+                }
+            }
+            function showCertificateForm() {
+                const formContainer = document.getElementById('certificate-form-container');
+                formContainer.classList.add('show');
+                formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            document.getElementById('close-congrats').addEventListener('click', () => {
+                document.getElementById('congratulations-message').classList.remove('show');
+            });
+            
+            // --- CÓDIGO DO WHATSAPP ADAPTADO PARA NR-12 ---
+            document.getElementById('submit-certificate').addEventListener('click', () => {
+                const name = document.getElementById('full-name').value;
+                const cpf = document.getElementById('cpf').value;
+                const email = document.getElementById('email').value;
+                if (name && cpf && email) {
+                    const message = `Olá! Concluí o curso de NR-12 e gostaria de solicitar meu certificado.\n\n*Nome:* ${name}\n*CPF:* ${cpf}\n*E-mail:* ${email}`;
+                    const encodedMessage = encodeURIComponent(message);
+                    const phoneNumber = '5561998300711';
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                    window.open(whatsappUrl, '_blank');
+                } else {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                }
+            });
+
+            moduleSelector.addEventListener('change', (event) => {
+                loadModuleContent(event.target.value);
+            });
+
+            // Inicialização
+            populateModuleSelector();
+            updateProgress();
+            loadModuleContent('');
+        });
+    </script>
+</body>
+</html>
